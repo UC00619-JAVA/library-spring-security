@@ -9,6 +9,8 @@ import com.example.libraryjpa.transfer.ReviewResponse;
 import com.example.libraryjpa.service.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,9 +34,17 @@ public class BookController {
     private final BookService bookService;
 
     // GET /api/books  or  /api/books?author=Robert C. Martin
+    // paginated: /api/books?page=0&size=10&sort=title
     @GetMapping
-    public List<BookResponse> findAll(@RequestParam(required = false) String author) {
-        return bookService.findAll(author);
+    public Page<BookResponse> findAll(@RequestParam(required = false) String author,
+                                      Pageable pageable) {
+        return bookService.findAll(author, pageable);
+    }
+
+    // GET /api/books/available -> only the books that are not borrowed
+    @GetMapping("/available")
+    public List<BookResponse> findAvailable() {
+        return bookService.findAvailable();
     }
 
     // NEW (session 15): GET /api/books/summary -> title + categories of every book

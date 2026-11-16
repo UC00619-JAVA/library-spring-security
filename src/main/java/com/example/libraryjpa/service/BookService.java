@@ -12,6 +12,8 @@ import com.example.libraryjpa.entity.Review;
 import com.example.libraryjpa.repository.BookRepository;
 import com.example.libraryjpa.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,11 +27,18 @@ public class BookService {
     private final ReviewRepository reviewRepository;
 
     @Transactional(readOnly = true)
-    public List<BookResponse> findAll(String author) {
-        List<Book> books = (author == null)
-                ? bookRepository.findAll()
-                : bookRepository.findByAuthor(author);
-        return books.stream().map(BookResponse::from).toList();
+    public Page<BookResponse> findAll(String author, Pageable pageable) {
+        Page<Book> books = (author == null)
+                ? bookRepository.findAll(pageable)
+                : bookRepository.findByAuthor(author, pageable);
+        return books.map(BookResponse::from);
+    }
+
+    @Transactional(readOnly = true)
+    public List<BookResponse> findAvailable() {
+        return bookRepository.findAvailableBooks().stream()
+                .map(BookResponse::from)
+                .toList();
     }
 
     @Transactional(readOnly = true)
